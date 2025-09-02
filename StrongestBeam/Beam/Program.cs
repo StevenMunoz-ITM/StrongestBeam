@@ -1,18 +1,18 @@
-﻿class ProgramaViga
+﻿class BeamProgram
 {
     static void Main()
     {
-        string opcionContinuar;
+        string continueOption;
         do
         {
             Console.Write("Ingrese la viga: ");
-            string viga = Console.ReadLine()!;
+            string beam = Console.ReadLine()!;
 
-            if (!LaVigaEstaBienConstruida(viga))
+            if (!IsBeamWellConstructed(beam))
             {
                 Console.WriteLine("La viga está mal construida!");
             }
-            else if (LaBaseSoportaElPeso(viga))
+            else if (DoesBaseSupportWeight(beam))
             {
                 Console.WriteLine("La viga soporta el peso!");
             }
@@ -22,33 +22,33 @@
             }
 
             Console.Write("¿Desea continuar? (S/N): ");
-            opcionContinuar = Console.ReadLine()!.Trim().ToUpper();
-        } while (opcionContinuar == "S");
+            continueOption = Console.ReadLine()!.Trim().ToUpper();
+        } while (continueOption == "S");
     }
 
-    static bool LaVigaEstaBienConstruida(string viga)
+    static bool IsBeamWellConstructed(string beam)
     {
-        if (string.IsNullOrEmpty(viga))
+        if (string.IsNullOrEmpty(beam))
             return false;
 
-        if (viga[0] != '%' && viga[0] != '&' && viga[0] != '#')
+        if (beam[0] != '%' && beam[0] != '&' && beam[0] != '#')
             return false;
 
-        bool ultimaFueConexion = false;
+        bool lastWasConnection = false;
         int i = 1;
-        while (i < viga.Length)
+        while (i < beam.Length)
         {
-            if (viga[i] == '=')
+            if (beam[i] == '=')
             {
-                ultimaFueConexion = false;
+                lastWasConnection = false;
                 i++;
             }
-            else if (viga[i] == '*')
+            else if (beam[i] == '*')
             {
-                if (ultimaFueConexion)
+                if (lastWasConnection)
                     return false;
-                if (i == 1 || viga[i - 1] != '=') return false;
-                ultimaFueConexion = true;
+                if (i == 1 || beam[i - 1] != '=') return false;
+                lastWasConnection = true;
                 i++;
             }
             else
@@ -59,36 +59,36 @@
         return true;
     }
 
-    static bool LaBaseSoportaElPeso(string viga)
+    static bool DoesBaseSupportWeight(string beam)
     {
-        int resistencia = viga[0] switch
+        int resistance = beam[0] switch
         {
             '%' => 10,
             '&' => 30,
             '#' => 90,
-             _ => 0
+            _ => 0
         };
 
-        int pesoTotal = 0;
+        int totalWeight = 0;
         int i = 1;
-        while (i < viga.Length)
+        while (i < beam.Length)
         {
-            int largueros = 0;
-            while (i < viga.Length && viga[i] == '=')
+            int stringers = 0;
+            while (i < beam.Length && beam[i] == '=')
             {
-                largueros++;
+                stringers++;
                 i++;
             }
 
-            for (int j = 1; j <= largueros; j++)
-                pesoTotal += j;
+            for (int j = 1; j <= stringers; j++)
+                totalWeight += j;
 
-            if (i < viga.Length && viga[i] == '*')
+            if (i < beam.Length && beam[i] == '*')
             {
-                pesoTotal += largueros * 2;
+                totalWeight += stringers * 2;
                 i++;
             }
         }
-        return resistencia >= pesoTotal;
+        return resistance >= totalWeight;
     }
 }

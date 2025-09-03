@@ -1,18 +1,13 @@
-﻿class BeamProgram
+﻿public class StrongestBeam
 {
-    static void Main()
+    public static void Main()
     {
-        string continueOption;
-        do
-        {
-            Console.Write("Ingrese la viga: ");
-            string beam = Console.ReadLine()!;
+        Console.Write("Ingrese la viga:");
+        string viga = Console.ReadLine()!;
 
-            if (!IsBeamWellConstructed(beam))
-            {
-                Console.WriteLine("La viga está mal construida!");
-            }
-            else if (DoesBaseSupportWeight(beam))
+        if (EsValida(viga))
+        {
+            if (SoportaPeso(viga))
             {
                 Console.WriteLine("La viga soporta el peso!");
             }
@@ -20,75 +15,85 @@
             {
                 Console.WriteLine("La viga NO soporta el peso!");
             }
-
-            Console.Write("¿Desea continuar? (S/N): ");
-            continueOption = Console.ReadLine()!.Trim().ToUpper();
-        } while (continueOption == "S");
+        }
+        else
+        {
+            Console.WriteLine("La viga está mal construida!");
+        } 
     }
 
-    static bool IsBeamWellConstructed(string beam)
+    public static bool EsValida(string viga)
     {
-        if (string.IsNullOrEmpty(beam))
+        string Base = viga.Substring(0, 1);
+        if (!(Base.Equals("%") || Base.Equals("&") || Base.Equals("#")))
             return false;
 
-        if (beam[0] != '%' && beam[0] != '&' && beam[0] != '#')
-            return false;
+        int n = viga.Length;
+        int conCon = 0;
+        string pieza = "";
 
-        bool lastWasConnection = false;
-        int i = 1;
-        while (i < beam.Length)
+        for (int i = 1; i < n; i++) 
         {
-            if (beam[i] == '=')
-            {
-                lastWasConnection = false;
-                i++;
-            }
-            else if (beam[i] == '*')
-            {
-                if (lastWasConnection)
-                    return false;
-                if (i == 1 || beam[i - 1] != '=') return false;
-                lastWasConnection = true;
-                i++;
-            }
-            else
-            {
+            pieza = viga.Substring(i, 1);
+            if (!(pieza.Equals("=") || pieza.Equals("*")))
                 return false;
-            }
         }
+
+        if (pieza.Equals("*"))
+        {
+            conCon++;
+        }
+        else
+        {
+            conCon = 0;
+        }
+        if (conCon == 2)
+        {
+            return false;
+        }
+
         return true;
     }
 
-    static bool DoesBaseSupportWeight(string beam)
+    public static bool SoportaPeso(string viga)
     {
-        int resistance = beam[0] switch
-        {
-            '%' => 10,
-            '&' => 30,
-            '#' => 90,
-            _ => 0
-        };
+        string Base = viga.Substring(0, 1);
 
-        int totalWeight = 0;
-        int i = 1;
-        while (i < beam.Length)
+        int n = viga.Length;
+        int pesoTotal = 0;
+        int pesoSegmento = 0;
+        string pieza = "";
+
+        for (int i = 1; i < n; i++)
         {
-            int stringers = 0;
-            while (i < beam.Length && beam[i] == '=')
+            pieza = viga.Substring(i, 1);
+            if (pieza.Equals("="))
             {
-                stringers++;
-                i++;
+                pesoSegmento++;
             }
-
-            for (int j = 1; j <= stringers; j++)
-                totalWeight += j;
-
-            if (i < beam.Length && beam[i] == '*')
+            else 
             {
-                totalWeight += stringers * 2;
-                i++;
+                pesoTotal += pesoSegmento * 3;
+                pesoSegmento = 0;
             }
         }
-        return resistance >= totalWeight;
+
+        pesoTotal += pesoSegmento;
+
+        int pesoBase = 0;
+        switch (Base)
+        {
+            case "%":
+                pesoBase = 10;
+                break;
+            case "&":
+                pesoBase = 30; 
+                break;
+            case "#":
+                pesoBase = 90;
+                break;
+        }
+
+        return pesoBase >= pesoTotal;
     }
 }
